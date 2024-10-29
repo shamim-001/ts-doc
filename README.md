@@ -1068,3 +1068,286 @@ const Status = {
   Pending: "pending",
 } as const; // Object as const
 ```
+
+# Functions in TypeScript
+
+## Intro
+
+```ts
+// Defining a named function in TypeScript
+// Functions often need optional params
+// We can add optional params by using ? just like we do with objects
+function intro(name: string, age: number, country?: string): string {
+  if (country) {
+    return `My name is ${name} and I am ${age} years old, I live in ${country}`;
+  }
+  return `My name is ${name} and I am ${age} years old`;
+}
+
+// TypeScript will throw an error if all defualt params are not added as arguments
+// The error displays while you are programming and not at runtime
+//! intro("John");
+intro("John", 32);
+```
+
+## Custom params and return types
+
+```ts
+enum AgeUnit {
+  Years = "years",
+  Months = "months",
+}
+
+type Person = {
+  name: string;
+  age: number;
+  ageUnit: AgeUnit;
+  country: string;
+};
+
+let person: Person = {
+  name: "Scott",
+  age: 30,
+  ageUnit: AgeUnit.Years,
+  country: "USA",
+};
+
+function convertAgeToMonths(person: Person): Person {
+  if (person.ageUnit === AgeUnit.Years) {
+    person.age = person.age * 12;
+    person.ageUnit = AgeUnit.Months;
+  }
+  return person;
+}
+
+console.log(convertAgeToMonths(person));
+```
+
+## Function call signatures
+
+```ts
+enum AgeUnit {
+  Years = "years",
+  Months = "months",
+}
+
+// Greeting can be defined as a type as well
+type GreetingFunction = (
+  greeting: string /* can have additional params */
+) => string;
+
+type Person = {
+  name: string;
+  age: number;
+  ageUnit: AgeUnit;
+  country: string;
+  // greet: Function;
+  greet: GreetingFunction;
+};
+
+let person: Person = {
+  name: "Scott",
+  age: 30,
+  ageUnit: AgeUnit.Years,
+  country: "USA",
+  greet: (greeting) => {
+    return `${greeting} ${person.name}`;
+  },
+};
+
+function convertAgeToMonths(person: Person): Person {
+  if (person.ageUnit === AgeUnit.Years) {
+    person.age = person.age * 12;
+    person.ageUnit = AgeUnit.Months;
+  }
+  return person;
+}
+
+console.log(convertAgeToMonths(person));
+console.log(person.greet("Hello"));
+```
+
+## Anonymous functions
+
+```ts
+const students = ["Alice", "Bob", "Mark"];
+
+// Lets assume that you are looping through the students array
+// Since students is an array fo strings even when using annonymous function like this
+// TypeScript is able to correctly infer the type of each student
+students.map((student) => {
+  console.log(student);
+});
+
+// This also works with the function defined using the function keyword and not just the arrow functions
+students.map(function (student) {
+  console.log(student);
+});
+```
+
+## void and never
+
+```ts
+// At times there are functions which do not return anything
+// this function does not return anything
+// Hence for rerturn type we can use a special TypeScript type called void
+function writeToDatabase(value: string): void {
+  console.log("Writing to database:", value);
+}
+
+// This is different from void because this function never completes execution
+function throwError(error: string): never {
+  throw new Error(error);
+}
+
+// We check these types and hence void can be used in place of never but not visa versa
+type check = never extends void ? true : false;
+type checks = void extends never ? true : false;
+```
+
+## async functions
+
+```ts
+//  Async fucntion in JavaScript always return a promise
+// Declaration of async function using the function keyword
+async function fetchFromDatabase(id: number): Promise<any> {}
+
+//  Declaration of async fucntion using the arrow function syntax
+const anotherAsyncFunction = async (): Promise<any> => {};
+
+// Async fucntion as a function express
+const fucntionExpression = async function (): Promise<any> {};
+
+// Setting return types apart from any
+async function returnString(id: number): Promise<string> {
+  return Promise.resolve("string");
+}
+
+type User = {
+  name: string;
+  age: number;
+};
+
+// If User type is nto returned TS throws an error
+async function returnObject(id: number): Promise<User> {
+  return Promise.resolve({ name: "John", age: 21 });
+}
+```
+
+## rest parameters
+
+```ts
+// Unlimited function params using the
+function multiplyBy(by: number, ...numbers: number[]) {
+  return numbers.map((eachNumber) => by * eachNumber);
+}
+
+// Calling the function
+console.log(multiplyBy(2, 3, 4, 5));
+console.log(multiplyBy(2, 3, 4));
+
+// Strictly typing rest parameters
+const args = [8, 5];
+// We get this erro because if we see the signature of the function it takes in 2 arguments
+// Here TS s not sure that args will always contain 2 arguments
+const angle = Math.atan2(...args);
+
+// The solution is to define args as a tuple
+const args1 = [8, 5] as const;
+// Now TypeScript will not thwo an error because it will now know that args are always of a fixed length because its a tuple
+const angle1 = Math.atan2(...args1);
+
+// We can define type annotate it like this as well
+const args2: [number, number] = [8, 5]; // Here using as const is not needed
+const angle2 = Math.atan2(...args2);
+```
+
+## Parmaeter destructuring
+
+```ts
+// Parmaeter destructuring is also possible just like JavaScript
+type Numbers = {
+  a: number;
+  b: number;
+  c: number;
+};
+
+// Declare and object of numbers
+let numbers: Numbers = {
+  a: 2,
+  b: 3,
+  c: 4,
+};
+
+// create a function to print numbers
+// function sum(numbers: Numbers) {
+//   console.log(numbers);
+// }
+
+// Destructure numbers
+// TS will infer each of the destructured params correctly as number types
+function sum({ a, b, c }: Numbers) {
+  return a + b + c;
+}
+
+// While invoking the function you pass the numbers object and
+// destructuring with type inference will play the role
+console.log(sum(numbers));
+
+// wrong type will lead to an error
+console.log(sum({ a: 3, b: 4, c: "c" }));
+```
+
+## Test
+
+```ts
+/**
+ * Practice Excercise for functions
+ */
+
+//* 1. Declare a function named greet that takes a string parameter name and returns a greeting message.
+
+//* 2. Define an type Product with properties id (number) and name (string). Create a function named getProduct that takes an id parameter and returns a Product.
+
+//* 3. Declare a function signature named Calculator as a type that takes two numbers and returns a number. Implement two functions add and subtract that match this signature.
+
+//* 4. Create a function named logMessage that takes a string message and logs it to the console, returning void. Also, create a function named throwError that takes a string message and throws an error, returning never.
+```
+
+## Test Answers
+
+```ts
+/**
+ * Practice Excercise for functions
+ */
+
+//* 1. Declare a function named greet that takes a string parameter name and returns a greeting message.
+function greet(name: string): string {
+  return `Hello, ${name}!`;
+}
+
+//* 2. Define an type Product with properties id (number) and name (string). Create a function named getProduct that takes an id parameter and returns a Product.
+interface Product {
+  id: number;
+  name: string;
+}
+
+function getProduct(id: number): Product {
+  return { id, name: `Product ${id}` };
+}
+
+//* 3. Declare a function signature named Calculator as a type that takes two numbers and returns a number. Implement two functions add and subtract that match this signature.
+type Calculator = (a: number, b: number) => number;
+
+const add: Calculator = (a, b) => a + b;
+const subtract: Calculator = (a, b) => a - b;
+
+//* 4. Create a function named logMessage that takes a string message and logs it to the console, returning void. Also, create a function named throwError that takes a string message and throws an error, returning never.
+function logMessage(message: string): void {
+  console.log(message);
+}
+
+function throwError(message: string): never {
+  throw new Error(message);
+}
+```
