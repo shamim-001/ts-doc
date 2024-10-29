@@ -745,3 +745,326 @@ let airplane: Airplane = {
   },
 };
 ```
+
+# Arrays and Enums
+
+## Intro
+
+```ts
+// Declaring an array of numbers
+let a: number[] = [1, 2, 3];
+//  Generic syntax of declaring array of strings
+let b: Array<string> = ["a", "b", "c"];
+// Array containing mutiple types
+let c: (string | number)[] = ["a", "b", 1];
+
+// Declare a Caterer type
+type Caterer = {
+  name: string;
+  address: string;
+  phone: number;
+};
+
+// Declare a Seats type
+type Seats = {
+  [keyof: string]: string;
+};
+
+// Declare a Airplane Type
+type Airplane = {
+  model: string;
+  flightNumber: string;
+  timeOfDeparture: Date;
+  timeOfArrival: Date;
+  caterer: Caterer;
+  seats: Seats;
+};
+
+// Declarign a type for an array of Airplanes
+// Example of an array of objects
+type Airplanes = Airplane[];
+
+// Assign Airplane Type to Object
+let airplanes: Airplanes = [
+  {
+    model: "Airbus A380",
+    flightNumber: "A2201",
+    timeOfDeparture: new Date(),
+    timeOfArrival: new Date(),
+    caterer: {
+      name: "Special Food Ltd",
+      address: "484, Some Street, New York",
+      phone: 7867856751,
+    },
+    seats: {
+      A1: "John Doe",
+      A2: "Mark Doe",
+      A3: "Sam Doe",
+    },
+  },
+];
+```
+
+## Tuples
+
+```ts
+// What if the person array needs to have a fixed set of values
+// We create a Tuple for such a situation
+let person: [string, string, number];
+person = ["John", "Doe", 18];
+
+// A user array can have optional properties as well
+let user: [string, string, number, string?];
+user = ["Mark", "Doe", 21, "mark@doe.com"];
+
+// Tuple with multiple string value which do not exist at the time of declaration
+type listOfStudents = [number, boolean, ...string[]];
+
+const passingStudents: listOfStudents = [3, true, "John", "Stella", "Mark"];
+
+const failingStudents: listOfStudents = [1, false, "Scott"];
+
+// Tuples with any number of value in the beginning or end
+// Type Alias can be used with Tuples as well
+type StringBooleansNumber = [string, ...boolean[], number];
+type BooleansStringNumber = [...boolean[], string, number];
+
+let stringBooleanNumber: StringBooleansNumber = ["string", true, false, 32];
+let booleanStringNumber: BooleansStringNumber = [true, false, "string", 32];
+```
+
+## Readonly Arrays
+
+```ts
+// An array can be converted into readonly using the readopnly keyword
+let number: readonly number[] = [1, 2, 3];
+
+// Once an array is readonly no values can be added or removed from an array
+number.push(1);
+
+// A tuple can be read only also
+type ReadOnlyTuple = readonly [string, string, number];
+
+// For our example let's create a new Tuple which is readonly
+type ReadOnlyPerson = readonly [string, string, number];
+
+// Creating a new readonly person
+const person: ReadOnlyPerson = ["John", "Smith", 32];
+
+//  There are some alternavites for creating Readonly Arrays
+type a = Readonly<string[]>;
+type b = ReadonlyArray<string>;
+
+//  Alternative syntax for Readonly Tuple
+type c = Readonly<[string, string, number]>;
+```
+
+## Enums
+
+```ts
+//  Why Are enums needed?
+// We ofetn declare constants in JavaScript for eg.
+const STATUS_LOADING = "loading";
+const STATUS_STOPPED = "stopped";
+
+// The intension of declaring these constants is that we do not want the value to change
+// because these cannot be reassiged to developers bny mistake cannot do this
+// JavaScript will not throw an error but will not reassign the constant it will always remain loading
+STATUS_LOADING = "stopped";
+
+// Auto incrementing values given to enums
+// Single enum can contain all values
+enum Direction {
+  Up,
+  Down,
+  Left,
+  Right,
+}
+
+// Assigning the first number and the rest would auto increment
+enum Direction2 {
+  Up = 1,
+  Down,
+  Left,
+  Right,
+}
+
+// String Enums
+export enum Roles {
+  admin = "admin",
+  author = "author",
+  editor = "editor",
+}
+
+// Use case for enums
+type Person = {
+  name: string;
+  email: string;
+  password: string;
+  role: Roles;
+};
+
+const person: Person = {
+  name: "John",
+  email: "john@email.com",
+  password: "password",
+  role: Roles.admin,
+};
+
+// Enums can be hetrogeneous as well
+// Assigning the first number and the rest would auto increment
+enum Direction3 {
+  Up = 1,
+  Down = "Down",
+  Left = "Left",
+}
+```
+
+## Enums are available in JavaScript as Objects
+
+```ts
+// Auto incrementing values given to enums
+enum Direction {
+  Up,
+  Down,
+  Left,
+  Right,
+}
+
+// Assigning the first number and the rest would auto increment
+enum Direction2 {
+  Up = 1,
+  Down,
+  Left,
+  Right,
+}
+
+// String Enums
+export enum Roles {
+  admin = "admin",
+  author = "author",
+  editor = "editor",
+}
+
+// Use case for enums
+type Person = {
+  name: string;
+  email: string;
+  password: string;
+  role: Roles;
+};
+
+const person: Person = {
+  name: "John",
+  email: "john@email.com",
+  password: "password",
+  role: Roles.admin,
+};
+
+// Enums can be hetrogeneous as well
+// Assigning the first number and the rest would auto increment
+enum Direction3 {
+  Up = 1,
+  Down = "Down",
+  Left = "Left",
+}
+
+// Enums are available in JavaScript as Objects
+console.log(Roles);
+```
+
+## Enums vs Object
+
+```ts
+// Redeclaring the same  using Enum
+// const Enum, is not compiled in JavaScript as an Object but only the value is used
+const enum EDirection {
+  Up,
+  Down,
+  Left,
+  Right,
+}
+// Show the use of value
+let eDirection = EDirection.Up;
+
+// Declaring an object with same values as a constant
+// Typescript sets each property as readonly
+const ODirection = {
+  Up: 0,
+  Down: 1,
+  Left: 2,
+  Right: 3,
+} as const;
+
+// Now this acts as an enum because you cannot change the value of properties
+console.log("Object as const", ODirection.Up);
+ODirection.Up = "newValue";
+```
+
+## Computed enums
+
+```ts
+// Enums can contain computed values as well
+enum AccessPermission {
+  None = 0,
+  Read = 1,
+  Write = 2,
+  ReadWrite = Read + Write,
+  Delete = 4,
+  All = ReadWrite | Delete,
+}
+
+console.log(AccessPermission.ReadWrite);
+console.log(AccessPermission.All);
+```
+
+## Test
+
+```ts
+// Practice Questions
+//* 1. Create an array numbers that only accepts numbers and another array strings that only accepts strings.
+
+//* 2. Create a tuple person that holds a string (name) and a number (age).
+
+//* 3. Create a readonly array colors that holds strings and a readonly tuple point that holds two numbers (x, y). Attempt to modify their elements and observe the TypeScript error.
+
+//* 4. Create an enum called StatusEnum that should 3 properties Active, Inactive, Pending
+
+//* 5. Create an object as const called Status with the same structure as an StatusEnum
+```
+
+## Test Answers
+
+```ts
+//* 1. Create an array numbers that only accepts numbers and another array strings that only accepts strings.
+let numbers: number[] = [1, 2, 3];
+let strings: string[] = ["a", "b", "c"];
+
+//* 2. Create a tuple person that holds a string (name) and a number (age).
+type Person = [string, number];
+let person: Person = ["John", 32];
+
+//* 3. Create a readonly array colors that holds strings and a readonly tuple point that holds two numbers (x, y). Attempt to modify their elements and observe the TypeScript error.
+type Colors = readonly string[];
+type Point = readonly [number, number];
+
+let colors: Colors = ["red", "green", "blue"];
+let point: Point = [1, 2];
+
+colors.push("yellow");
+point.push(3);
+
+//* 4. Create an enum called StatusEnum that should 3 properties Active, Inactive, Pending
+enum StatusEnum {
+  Active,
+  Inactive,
+  Pending,
+}
+
+//* 5. Create an object as const called Status with the same structure as an StatusEnum
+const Status = {
+  Active: "active",
+  Inactive: "inactive",
+  Pending: "pending",
+} as const; // Object as const
+```
