@@ -403,3 +403,345 @@ let customAge: CustomAge = 50; // @Error custom age has a literal value of 79
 let primitive: Primitive = new Date(); // @Error data is not a part of the union
 let years: CheckScore = []; // Valid is years is a litral empty array
 ```
+
+# Objects in TypeScript
+
+## Intro
+
+```ts
+let person = {
+  name: "Mark",
+  age: 32,
+};
+
+// Car is any object without a shape or defined properties
+let car: Object = {
+  brand: "BMW",
+  color: "black",
+};
+
+// The problem using teh Object type, its a super type and Arrays are also objects
+let score: Object = [];
+
+// If you see just because car is a Object I can re-assign it as an array
+// ! This is a problem
+car = [21, 32, 48];
+
+// Defining an object with the litral syntax
+let newCar: {} = {
+  brand: "BMW",
+  color: "black",
+};
+
+// The problem with usign the litral object {} is that now properties are not defined and can vary
+// This can lead to errors in the application
+newCar = {
+  brand: "BMW",
+};
+```
+
+## Type Alias
+
+```ts
+// A post can be strictly typed using type annotations
+// let post: {
+//   title: string; // Type Annotations using semi-colons instead of commas
+//   content: string;
+//   date: Date;
+// } = {
+//   title: "This is a blog post",
+//   content: "Content of the post",
+//   date: new Date(),
+// };
+
+// We can use Type declarations using Type Alias
+
+type Post = {
+  title: string; // Type Annotations using semi-colons instead of commas
+  content: string;
+  date: Date;
+};
+
+let post: Post = {
+  title: "This is a blog post",
+  content: "Content of the post",
+  date: new Date(),
+};
+
+// Advantage of type declaration, can use the same type again for a new object
+let post2: Post = {
+  title: "This is a blog post 2",
+  content: "Content of the post 2",
+  date: new Date(),
+};
+```
+
+## Nested Objects
+
+```ts
+// Better to declare a separate type for Author
+type Author = {
+  name: string;
+  age: number;
+  email: string;
+};
+
+type Post = {
+  title: string; // Type Annotations using semi-colons instead of commas
+  content: string;
+  date: Date;
+  author: Author; // Assign Author type to author property on Post type
+};
+
+let post: Post = {
+  title: "This is a blog post",
+  content: "Content of the post",
+  date: new Date(),
+  author: {
+    name: "John",
+    age: 32,
+    email: "john@doe.com",
+  },
+};
+```
+
+## Index Signature with object
+
+```ts
+// Better to declare a separate type for Author
+type Author = {
+  name: string;
+  age: number;
+  email: string;
+  readonly type: "human" | "ai";
+};
+
+type AwardDetails = {
+  name: string;
+  date: Date;
+};
+
+type Awards = {
+  [keyof: string]: AwardDetails;
+};
+
+type Post = {
+  title: string; // Type Annotations using semi-colons instead of commas
+  content: string;
+  date: Date;
+  author: Author; // Assign Author type to author property on Post type
+  awards: Awards;
+  category?: string;
+};
+
+let post: Post = {
+  title: "This is a blog post",
+  content: "Content of the post",
+  date: new Date(),
+  category: "javascript",
+  author: {
+    name: "John",
+    age: 32,
+    email: "john@doe.com",
+    type: "human",
+  },
+  awards: {
+    web: {
+      name: "Wed Awards",
+      date: new Date(),
+    },
+    web3: {
+      name: "Web 3",
+      date: new Date(),
+    },
+  },
+};
+
+let post2: Post = {
+  title: "This is a blog post",
+  content: "Content of the post",
+  date: new Date(),
+  author: {
+    name: "John",
+    age: 32,
+    email: "john@doe.com",
+    type: "human",
+  },
+  awards: {
+    web: {
+      name: "Wed Awards",
+      date: new Date(),
+    },
+  },
+};
+
+// Readonly properties once created cannot be re-assigned
+post2.author.type = "ai";
+```
+
+## union type with object
+
+```ts
+// Declare a type for the Dog
+type Dog = {
+  name: string;
+  barks: boolean;
+  wags: boolean;
+};
+
+// Declare a type for the Cat
+type Cat = {
+  name: string;
+  purrs: boolean;
+};
+
+// Create a new type which is a union of Dog and Cat
+type DogAndCatUnion = Dog | Cat;
+
+// All Dog properties
+let dog: DogAndCatUnion = {
+  name: "Buddy",
+  barks: true,
+  wags: true,
+};
+
+// All Cat properties
+let cat: DogAndCatUnion = {
+  name: "Bella",
+  purrs: true,
+};
+
+// All Dog and partial cat properties
+let dogAndCat: DogAndCatUnion = {
+  name: "Hybrid",
+  barks: true,
+  wags: true,
+  purrs: true,
+};
+
+// Cannot contain partial Properties of one of the types
+let partialDog: DogAndCatUnion = {
+  name: "Hybrid",
+  barks: true,
+};
+```
+
+## Discriminated Unions
+
+```ts
+// To Discriminate Unions All the three types must have the state property
+type NetworkLoadingState = {
+  state: "loading";
+};
+
+type NetworkFailedState = {
+  state: "failed";
+  code: number;
+};
+
+type NetworkSuccessState = {
+  state: "success";
+  response: {
+    title: string;
+    duration: number;
+    summary: string;
+  };
+};
+
+// We Want to create a Network State with includes Loading, Failed and Success
+// Create a type which represents only one of the above types
+// but you aren't sure which it is yet.
+type NetworkState =
+  | NetworkLoadingState
+  | NetworkFailedState
+  | NetworkSuccessState;
+
+// Based on the types created now we can discriminate the network state and take action based on the state
+// We need to create a logger function which logs the state of the network
+function logger(state: NetworkState): string {
+  // Right now TypeScript does not know which of the three
+  // potential types state could be.
+
+  // Trying to access a property which isn't shared
+  // across all types will raise an error
+  //! state.code;
+
+  // By switching on state, TypeScript can narrow the union
+  // down in code flow analysis
+  switch (state.state) {
+    case "loading":
+      return "Downloading...";
+    case "failed":
+      // The type must be NetworkFailedState here,
+      // so accessing the `code` field is safe
+      return `Error ${state.code} downloading`;
+    case "success":
+      return `Downloaded ${state.response.title} - ${state.response.summary}`;
+  }
+}
+```
+
+## Test
+
+```ts
+let airplane = {
+  model: "Airbus A380",
+  flightNumber: "A2201",
+  timeOfDeparture: new Date(),
+  timeOfArrival: new Date(),
+  caterer: {
+    name: "Special Food Ltd",
+    address: "484, Some Street, New York",
+    phone: 7867856751,
+  },
+  seats: {
+    A1: "John Doe",
+    A2: "Mark Doe",
+    A3: "Sam Doe",
+  },
+};
+```
+
+## Test Answers
+
+```ts
+// Declare a Caterer type
+type Caterer = {
+  name: string;
+  address: string;
+  phone: number;
+};
+
+// Declare a Seats type
+type Seats = {
+  [keyof: string]: string;
+};
+
+// Declare a Airplane Type
+type Airplane = {
+  model: string;
+  flightNumber: string;
+  timeOfDeparture: Date;
+  timeOfArrival: Date;
+  caterer: Caterer;
+  seats: Seats;
+};
+
+// Assign Airplane Type to Object
+let airplane: Airplane = {
+  model: "Airbus A380",
+  flightNumber: "A2201",
+  timeOfDeparture: new Date(),
+  timeOfArrival: new Date(),
+  caterer: {
+    name: "Special Food Ltd",
+    address: "484, Some Street, New York",
+    phone: 7867856751,
+  },
+  seats: {
+    A1: "John Doe",
+    A2: "Mark Doe",
+    A3: "Sam Doe",
+  },
+};
+```
