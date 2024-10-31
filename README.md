@@ -1351,3 +1351,404 @@ function throwError(message: string): never {
   throw new Error(message);
 }
 ```
+
+# Generics in TypeScript
+
+## Intro
+
+```ts
+// Let us look at this simple function which just returns the param
+
+//* function returnParam(param) {
+//*   return param;
+//* }
+
+// TS has a problem and is warning that param is of any type or is implicitly declared at any
+//* function returnParam(param: any) {
+//*   return param;
+//* }
+
+// While using any is certainly generic in that it will cause the function to accept any and all types for the type of arg, we actually are losing the information about what that type was when the function returns. If we passed in a number, the only information we have is that any type could be returned.
+
+// Since now we do not know the return type of this function we end up usign the return type as
+// any as well. We are back to JS behaviour
+
+//* function returnParam(param: any): any {
+//*   return param;
+//* }
+
+// Here, we will use a type variable, a special kind of variable that works on types rather than values. This is a generic variable we can pass to our function to retain the type of the value used
+// This is how it is done in case of functions
+
+function returnParam<Type>(param: Type): Type {
+  return param;
+}
+
+// With this generic in place the value of the type used to invoke the function is retained
+// thi is one way of invoking the function
+let stringOutput = returnParam<string>("string");
+
+//Here we explicitly set Type to be string as one of the arguments to the function call, denoted using the <> around the arguments rather than ().
+
+// The second way is also perhaps the most common. Here we use type argument inference — that is, we want the compiler to set the value of Type for us automatically based on the type of the argument we pass in:
+let stringOutput2 = returnParam("string");
+let numberOutput = returnParam(100);
+let numberArray = returnParam([1, 2, 3]);
+let objectOutput = returnParam({ name: "Mark", age: 21 });
+
+// Generic function declaration as an arrow function
+// using a call signature
+const myParam: <T>(param: T) => T = (param) => param;
+
+// Using a function expression
+const myParam2 = function <U>(param: U): U {
+  return param;
+};
+
+// Using a call signature in an object
+type ObjectType = {
+  myParam: <V>(param: V) => V;
+};
+```
+
+## Generic functions declaration
+
+```ts
+// Declare Generic Type
+type MyParam = <AnyName>(param: AnyName) => AnyName;
+
+//  First declare a generics function signature
+type GetFirstElement = <T>(arr: T[]) => T;
+// A generic array function that gets first element of every type of array
+const getFirstElement: GetFirstElement = (arr) => {
+  return arr[0];
+};
+
+// We declare two different tyopes of array
+const numberArray = [1, 2, 3];
+const stringArray = ["a", "b", "c"];
+
+// Typescript is correctly able to infer the value that will be return by expression
+// Even though the function is the same the returned type is different based on the input value
+let stringOutput = getFirstElement(stringArray);
+let numberOutput = getFirstElement(numberArray);
+
+// Where do declare generic dictates when typescript will binc a concrete type to a generic
+// what if the above function was declared with a different placement of generic
+type FirstElement<T> = (arr: T[]) => T;
+```
+
+## Generic and constrains with arrays
+
+```ts
+//  First declare a generics function signature
+type GetFirstElement = <T>(arr: T[]) => T;
+// A generic array function that gets first element of every type of array
+const getFirstElement: GetFirstElement = (arr) => {
+  return arr[0];
+};
+
+// We declare two different tyopes of array
+const numberArray = [1, 2, 3];
+const stringArray = ["a", "b", "c"];
+
+// Typescript is correctly able to infer the value that will be return by expression
+// Even though the function is the same the returned type is different based on the input value
+let stringOutput = getFirstElement(stringArray);
+let numberOutput = getFirstElement(numberArray);
+
+// Where do declare generic dictates when typescript will binc a concrete type to a generic
+// what if the above function was declared with a different placement of generic
+type FirstElement<T> = (arr: T[]) => T;
+
+// Here if the generic type is not passed at the time of function declaration TS will throw and error
+// So now you need to tell TypeScript which types can we used with this fucntion which solves a completely different purpose from the function that has been declared above
+// Hover over the function param and you will see that TS now identifies that param will be an
+// array of strings
+const firstElement: FirstElement<string> = (arr) => {
+  return arr[0];
+};
+
+// Generics can have constraints as well
+type HasLength = {
+  length: number;
+};
+
+function logLength<T extends HasLength>(item: T): void {
+  console.log(item.length);
+}
+
+// Any array like value that has a length property on it will be accepted as an argument
+logLength(numberArray);
+logLength(stringArray);
+logLength("Any String");
+
+// But if used for an object it will throw an error
+logLength({ name: "John", length: 12 });
+```
+
+## Generics with objects
+
+```ts
+type KeyValuePair<K, V> = {
+  key: K;
+  value: V;
+};
+
+const stringNumberPair: KeyValuePair<string, number> = {
+  key: "age",
+  value: 30,
+};
+
+const numberBooleanPair: KeyValuePair<number, boolean> = {
+  key: 1,
+  value: true,
+};
+
+console.log(stringNumberPair); // Output: { key: 'age', value: 30 }
+console.log(numberBooleanPair); // Output: { key: 1, value: true }
+
+/**
+ * Generics Constraints With Objects
+ */
+
+type HasId = {
+  id: number;
+};
+
+function printId<T extends HasId>(obj: T): void {
+  console.log(obj.id);
+}
+
+const user = {
+  id: 1,
+  name: "Alice",
+};
+
+printId(user); // Output: 1
+
+const product = {
+  id: 101,
+  name: "Laptop",
+};
+
+printId(product); // Output: 101
+```
+
+## keyof type operator
+
+```ts
+type Events = {
+  id: number;
+  date: Date;
+  type: "indoor" | "outdoor";
+};
+
+// The keyof operator takes an object type and produces a string or numeric literal union of its keys. The following type P is the same type
+// -> "id" | "date" | "type"
+
+type UnionOfKeysOfEvents = keyof Events;
+
+// You see these are literally the union of name of the keys of the Events object
+let idOfEvent: UnionOfKeysOfEvents = "id";
+let dateOfEvent: UnionOfKeysOfEvents = "date";
+
+// If index signatures where keys are defined as numeric properties
+type Numeric = {
+  [key: number]: string;
+};
+
+type NumericKeyOf = keyof Numeric;
+
+type NumberAndString = {
+  [key: string]: string;
+};
+// We get a union of numbers as well as a string because this is how JavaScript objects work behind the scenes
+// NumberAndString is string | number — this is because JavaScript object keys are always coerced to a string, so obj[0] is always the same as obj["0"].
+type NumberAndStringKeyoff = keyof NumberAndString;
+
+let stringObject: NumberAndString = {
+  0: "first",
+  second: "first",
+};
+
+// Accessing the object proerty with the index of the property
+console.log(stringObject["0"]);
+
+// Declaring partial types using generics and keyof
+type Person = {
+  name: string;
+  age: number;
+  address: string;
+};
+
+// Creating a type where the keys are the same as Person but the values are optional and nullable
+// Hover over PartialPerson to see how TypeScript is inferring it
+type PartialPerson = {
+  [K in keyof Person]?: Person[K] | null;
+};
+```
+
+## Generics Default Values
+
+```ts
+// Define a generic function to fetch data with a default type
+async function fetchData<T = any>(url: string): Promise<T> {
+  const response = await fetch(url);
+  const data: T = await response.json();
+  return data;
+}
+
+// Using the fetchData function with the default type (any)
+async function fetchDefault() {
+  const data = await fetchData("https://jsonplaceholder.typicode.com/posts/1");
+  console.log(data); // Output: any data structure, depends on the response
+}
+
+fetchDefault();
+
+// Using the fetchData function with a specified type
+// Lets declare a type based on the response that we get from the above fake API
+interface Post {
+  userId: number;
+  id: number;
+  title: string;
+  body: string;
+}
+
+async function fetchPost() {
+  const post = await fetchData<Post>(
+    "https://jsonplaceholder.typicode.com/posts/1"
+  );
+  console.log(post); // Output: { userId: 1, id: 1, title: "...", body: "..." }
+}
+
+fetchPost();
+```
+
+## Implimenting a polymorphic function
+
+```ts
+// Trying to create a simple implementation of JavaScript's own filter method
+const filter = (array: any[], predicate: Function) => {
+  let result: any[] = [];
+  for (let i = 0; i < array.length; i++) {
+    let item = array[i];
+    if (predicate(item)) {
+      result.push(item);
+    }
+  }
+  return result;
+};
+
+let numbers = [1, 3, 4, 6, 9, 7, 10, 12];
+// Predicate to filter all numbers greater than 7
+function predicate(item: number) {
+  return item > 7;
+}
+
+let animals = ["cat", "bat", "rat", "mat"];
+// Predicate to filter all cats from animals array
+function filterCats(item: string) {
+  return item === "cat";
+}
+
+// Result of invoking the function
+console.log(filter(numbers, predicate));
+console.log(filter(animals, filterCats));
+```
+
+## Filter Method
+
+```ts
+type Filter = {
+  (array: number[], predicate: (item: number) => boolean): number[];
+  (array: string[], predicate: (item: string) => boolean): string[];
+  (array: object[], predicate: (item: object) => boolean): object[];
+}; // function overloading
+
+// Trying to create a simple implementation of JavaScript's own filter method
+const filter = (array: any[], predicate: Function) => {
+  let result: any[] = [];
+  for (let i = 0; i < array.length; i++) {
+    let item = array[i];
+    if (predicate(item)) {
+      result.push(item);
+    }
+  }
+  return result;
+};
+
+let numbers = [1, 3, 4, 6, 9, 7, 10, 12];
+// Predicate to filter all numbers greater than 7
+function predicate(item: number) {
+  return item > 7;
+}
+
+let animals = ["cat", "bat", "rat", "mat"];
+// Predicate to filter all cats from animals array
+function filterCats(item: string) {
+  return item === "cat";
+}
+
+// Result of invoking the function
+console.log(filter(numbers, predicate));
+console.log(filter(animals, filterCats));
+```
+
+```ts
+type Filter = {
+  (array: number[], predicate: (item: number) => boolean): number[];
+  (array: string[], predicate: (item: string) => boolean): string[];
+  (array: object[], predicate: (item: object) => boolean): object[];
+};
+
+// Trying to create a simple implementation of JavaScript's own filter method
+const filter = (array: any[], predicate: Function) => {
+  let result: any[] = [];
+  for (let i = 0; i < array.length; i++) {
+    let item = array[i];
+    if (predicate(item)) {
+      result.push(item);
+    }
+  }
+  return result;
+};
+
+let numbers = [1, 3, 4, 6, 9, 7, 10, 12];
+// Predicate to filter all numbers greater than 7
+function predicate(item: number) {
+  return item > 7;
+}
+
+let animals = ["cat", "bat", "rat", "mat"];
+// Predicate to filter all cats from animals array
+function filterCats(item: string) {
+  return item === "cat";
+}
+
+// Result of invoking the function
+console.log(filter(numbers, predicate));
+console.log(filter(animals, filterCats));
+```
+
+## Map Method
+
+```ts
+const map = <T, U>(array: T[], func: (item: T) => U): (U | T)[] => {
+  if (array.length === 0) {
+    return array;
+  }
+
+  let result: U[] = [];
+
+  for (let i = 0; i < array.length; i++) {
+    result.push(func(array[i]));
+  }
+  return result;
+};
+
+let numbers = [4, 5, 6, 7, 8, 9];
+const converted = map(numbers, (num) => num.toString());
+console.log(converted);
+```
