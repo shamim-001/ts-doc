@@ -1752,3 +1752,446 @@ let numbers = [4, 5, 6, 7, 8, 9];
 const converted = map(numbers, (num) => num.toString());
 console.log(converted);
 ```
+
+# Classes in TypeScript
+
+## Test 1
+
+```ts
+class Book {
+  title: string;
+  author: string;
+  readonly ISBN: string;
+  yearPublished?: number;
+
+  constructor(
+    title: string,
+    author: string,
+    ISBN: string,
+    yearPublished?: number
+  ) {
+    this.title = title;
+    this.author = author;
+    this.ISBN = ISBN;
+    this.yearPublished = yearPublished;
+  }
+}
+
+const book = new Book(
+  "The Hobbit",
+  "J.R.R. Tolkien",
+  "978-0-06-070542-1",
+  1937
+);
+console.log(book);
+
+const logBookDetails = (book: Book): string => {
+  return `Title: ${book.title}, Author: ${book.author}, ISBN: ${book.ISBN}, Year Published: ${book.yearPublished}`;
+};
+
+console.log(logBookDetails(book));
+
+class Ebook extends Book {
+  fileSize: number;
+  format: string;
+
+  constructor(
+    title: string,
+    author: string,
+    readonly ISBN: string,
+    fileSize: number,
+    format: string,
+    yearPublished?: number
+  ) {
+    super(title, author, ISBN, yearPublished);
+    this.fileSize = fileSize;
+    this.format = format;
+  }
+}
+
+const ebook = new Ebook("abc", "Shamim", "23434-4234234-234", 56, "pdf");
+
+console.log(ebook);
+```
+
+## Method overriding
+
+```ts
+class User {
+  public name: string;
+  readonly email: string;
+  private phone: number;
+  public lastName?: string;
+
+  constructor(name: string, email: string, phone: number) {
+    this.name = name;
+    this.email = email;
+    this.phone = phone;
+  }
+
+  greet(): string {
+    return `Hello ${this.name}`;
+  }
+
+  getPhone(): number {
+    return this.phone;
+  }
+}
+
+const user = new User("jeff", "jeff@email.com", 123456789);
+console.log(user.greet());
+
+class Admin extends User {
+  isAdmin: boolean = true;
+  usersReporting: number;
+
+  constructor(
+    name: string,
+    email: string,
+    phone: number,
+    usersReporting: number
+  ) {
+    super(name, email, phone);
+    this.usersReporting = usersReporting;
+  }
+
+  // A greet methods can override the parent class method
+  // but the condition is that the child class methods must have the same signature
+  greet(): string {
+    return `Hello ${
+      this.name
+    }, your phone number is ${this.getPhone()} and you are an admin`;
+  }
+}
+
+const admin = new Admin("John", "john@email.com", 123456789, 10);
+console.log(admin.greet());
+```
+
+## shorthand for constructor
+
+```ts
+class User {
+  // shorthand for constructor
+  constructor(
+    public name: string,
+    public readonly email: string,
+    private phone: number,
+    public lastName?: string
+  ) {}
+
+  greet(): string {
+    return `Hello ${this.name}`;
+  }
+
+  getPhone(): number {
+    return this.phone;
+  }
+}
+
+const user = new User("jeff", "jeff@email.com", 123456789);
+console.log(user.greet());
+
+class Admin extends User {
+  isAdmin: boolean = true;
+
+  constructor(
+    name: string,
+    email: string,
+    phone: number,
+    public usersReporting: number
+  ) {
+    super(name, email, phone);
+  }
+
+  // A greet methods can override the parent class method
+  // but the condition is that the child class methods must have the same signature
+  greet(): string {
+    return `Hello ${
+      this.name
+    }, your phone number is ${this.getPhone()} and you are an admin`;
+  }
+}
+
+const admin = new Admin("John", "john@email.com", 123456789, 10);
+console.log(admin.greet());
+```
+
+## getters and setters
+
+```ts
+class Person {
+  private _age?: number;
+
+  constructor(public firstName: string, public lastName: string) {}
+
+  public set age(age: number) {
+    if (age > 150 || age < 0) {
+      throw new Error("Age must be between 0 and 150");
+    }
+    this._age = age;
+  }
+
+  public get age(): number {
+    if (!this._age) {
+      throw new Error("Age is not set");
+    }
+    return this._age;
+  }
+
+  get fullName(): string {
+    return `${this.firstName} ${this.lastName}`;
+  }
+}
+
+const John = new Person("John", "Doe");
+console.log(John.fullName);
+John.age = 32;
+console.log(John.age);
+```
+
+## Static members and methods
+
+```ts
+class Counter {
+  static count = 0;
+
+  static increment() {
+    Counter.count++;
+  }
+  static decrement() {
+    Counter.count--;
+  }
+}
+
+Counter.increment();
+Counter.increment();
+console.log(Counter.count); // 2
+```
+
+## Static blocks
+
+```ts
+class Counter {
+  static count = 0;
+
+  static increment() {
+    Counter.count++;
+  }
+  static decrement() {
+    Counter.count--;
+  }
+
+  static {
+    console.log("Static block");
+    Counter.count = 10;
+  }
+}
+
+Counter.increment();
+Counter.increment();
+console.log(Counter.count); // 12
+```
+
+## Generics with classes
+
+```ts
+class Box<T> {
+  private _value: T;
+
+  constructor(value: T) {
+    this._value = value;
+  }
+
+  get value(): T {
+    return this._value;
+  }
+  set value(newValue: T) {
+    this._value = newValue;
+  }
+}
+
+const numberBox = new Box<number>(10);
+console.log(numberBox.value);
+numberBox.value = 20;
+console.log(numberBox.value);
+
+const stringBox = new Box<string>("Hello");
+console.log(stringBox.value);
+stringBox.value = "World";
+console.log(stringBox.value);
+```
+
+## Generics use cases
+
+```ts
+type Identifiable = {
+  id: number;
+};
+
+type User = Identifiable & {
+  id: number;
+  name: string;
+  age: number;
+  email: string;
+};
+
+class Repository<T extends Identifiable> {
+  private items: T[] = [];
+
+  add(item: T): void {
+    this.items.push(item);
+  }
+
+  getById(id: number): T | undefined {
+    return this.items.find((item) => item.id === id);
+  }
+
+  getAll(): T[] {
+    return this.items;
+  }
+
+  remove(id: number): void {
+    this.items = this.items.filter((item) => item.id !== id);
+  }
+
+  update(item: T): void {
+    const index = this.items.findIndex((item) => item.id === item.id);
+    this.items[index] = item;
+  }
+}
+
+const usersRepository = new Repository<User>();
+usersRepository.add({ id: 1, name: "John", age: 32, email: "john@email.com" });
+usersRepository.add({ id: 2, name: "Mark", age: 21, email: "mark@email.com" });
+usersRepository.add({ id: 3, name: "Sam", age: 25, email: "sam@email.com" });
+
+console.log(usersRepository.getAll());
+console.log(usersRepository.getById(1));
+console.log(usersRepository.getById(3));
+
+usersRepository.remove(1);
+console.log(usersRepository.getAll());
+
+const user = usersRepository.getById(2);
+
+if (user) {
+  user.age = 40;
+  usersRepository.update(user);
+}
+console.log(usersRepository.getById(2));
+```
+
+## Mixins
+
+```ts
+type Constructor = new (...args: any[]) => {};
+
+function TimeStamp<T extends Constructor>(Base: T) {
+  return class extends Base {
+    protected timestamp: Date = new Date();
+
+    getTimestamp() {
+      return this.timestamp;
+    }
+  };
+}
+
+class User {
+  constructor(public name: string) {}
+}
+
+class UserWithTimestamp extends TimeStamp(User) {
+  constructor(name: string, public age: number) {
+    super(name);
+  }
+
+  displayInfo() {
+    console.log(`Name: ${this.name}, Age: ${this.age}`);
+  }
+}
+
+const user = new UserWithTimestamp("John", 38);
+console.log(user.name);
+console.log(user.age);
+console.log(user.getTimestamp());
+user.displayInfo();
+```
+
+## Test 2
+
+```ts
+/**
+ * ! You are developing a simple employee management system for a company. Implement the following requirements using TypeScript:
+ *
+ * TODO: 1. Class Definition: Create a class Employee with the following properties:
+ ** -  name (string, public)
+ ** -  age (number, public)
+ ** -  salary (number, private)
+ ** -  id (number, protected)
+ *
+ * TODO: 2. Use shorthand syntax in the constructor to initialize the properties name and age.
+ *
+ * TODO: 3. Implement getter and setter methods for the salary property. The setter should ensure the salary is a positive number.
+ *
+ * TODO: 4. Add a static property companyName (string, public) and a static method getCompanyName that returns the company name.
+ *
+ * TODO: 5. Create a subclass Manager that extends the Employee class. Add an additional property department (string, public).
+ *
+ * TODO: 6. Override a method getDetails in the Manager class to include the department information along with the employee details.
+ */
+```
+
+## Test answer
+
+```ts
+class Employee {
+  static companyName = "John's Company";
+
+  constructor(
+    public name: string,
+    public age: number,
+    private _salary: number,
+    protected id: number
+  ) {}
+
+  set salary(salary: number) {
+    if (salary < 0) {
+      throw new Error("Salary must be a positive number");
+    }
+    this._salary = salary;
+  }
+  get salary(): number {
+    return this._salary;
+  }
+
+  public static getCompanyName(): string {
+    return Employee.companyName;
+  }
+
+  getDetails(): string {
+    return `${this.name} is ${this.age} years old and earns $${this.salary} per month`;
+  }
+}
+
+const employee: Employee = new Employee("John", 32, 5000, 1);
+console.log(employee.getDetails());
+
+class Manager extends Employee {
+  constructor(
+    name: string,
+    age: number,
+    salary: number,
+    id: number,
+    public department: string
+  ) {
+    super(name, age, salary, id);
+  }
+  getDetails(): string {
+    return `${super.getDetails()}, works in ${this.department}`;
+  }
+}
+
+const manager: Manager = new Manager("Shamim Ahsan", 30, 5000, 1, "Sales");
+console.log(manager.getDetails());
+```
