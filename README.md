@@ -2195,3 +2195,378 @@ class Manager extends Employee {
 const manager: Manager = new Manager("Shamim Ahsan", 30, 5000, 1, "Sales");
 console.log(manager.getDetails());
 ```
+
+# Abstract Class in TypeScript
+
+## Intro
+
+```ts
+type Holidays = {
+  date: Date;
+  reason: string;
+}[];
+
+abstract class Department {
+  protected abstract holidays: Holidays;
+  protected constructor(protected name: string) {}
+
+  public addHolidays(holidays: Holidays) {
+    if (Array.isArray(holidays)) {
+      this.holidays.push(...holidays);
+    }
+  }
+
+  public getHolidays() {
+    if (this.holidays.length > 0) {
+      console.log(`Holidays for ${this.name} are:`);
+      this.holidays.forEach(
+        (holiday: { date: Date; reason: string }, index: number) => {
+          console.log(
+            `${index + 1}. ${holiday.date.toLocaleDateString()} - ${
+              holiday.reason
+            }`
+          );
+        }
+      );
+      return;
+    }
+
+    console.log("No holidays found");
+  }
+}
+
+class AccountingDepartment extends Department {
+  constructor() {
+    super("Accounting Department");
+  }
+  protected holidays: Holidays = [];
+
+  public getHolidays() {
+    console.log(`Method overridding for ${this.name}`);
+  }
+}
+
+class AdminDepartment extends Department {
+  constructor() {
+    super("Admin Department");
+  }
+  protected holidays: Holidays = [];
+
+  public getHolidays() {
+    console.log(`Method overridding for ${this.name}`);
+  }
+}
+
+const accountingDepartment: AccountingDepartment = new AccountingDepartment();
+const adminDepartment: AdminDepartment = new AdminDepartment();
+
+const accountingHolidays: Holidays = [
+  { date: new Date(2023, 0, 1), reason: "New Year's Day" },
+  { date: new Date(2023, 0, 2), reason: "Valentine's Day" },
+];
+
+accountingDepartment.addHolidays(accountingHolidays);
+
+const adminHolidays: Holidays = [
+  { date: new Date(2023, 0, 3), reason: "Martin Luther King Jr. Day" },
+  { date: new Date(2023, 0, 4), reason: "Washington's Birthday" },
+];
+
+adminDepartment.addHolidays(adminHolidays);
+
+accountingDepartment.getHolidays();
+adminDepartment.getHolidays();
+```
+
+## Abstract method
+
+```ts
+type Holidays = {
+  date: Date;
+  reason: string;
+}[];
+
+abstract class Department {
+  protected abstract holidays: Holidays;
+  protected constructor(protected name: string) {}
+
+  public addHolidays(holidays: Holidays) {
+    if (Array.isArray(holidays)) {
+      this.holidays.push(...holidays);
+    }
+  }
+
+  public abstract getHolidays(): void;
+}
+
+class AccountingDepartment extends Department {
+  constructor() {
+    super("Accounting Department");
+  }
+  protected holidays: Holidays = [];
+
+  public getHolidays() {
+    if (this.holidays.length > 0) {
+      console.log(`Holidays for ${this.name} are:`);
+      this.holidays.forEach(
+        (holiday: { date: Date; reason: string }, index: number) => {
+          console.log(
+            `${index + 1}. ${holiday.date.toLocaleDateString()} - ${
+              holiday.reason
+            }`
+          );
+        }
+      );
+      return;
+    }
+
+    console.log("No holidays found");
+  }
+}
+
+class AdminDepartment extends Department {
+  constructor() {
+    super("Admin Department");
+  }
+  protected holidays: Holidays = [];
+
+  public getHolidays() {
+    if (this.holidays.length > 0) {
+      console.log(`Holidays for ${this.name} are:`);
+      this.holidays.forEach(
+        (holiday: { date: Date; reason: string }, index: number) => {
+          console.log(
+            `${index + 1}. ${holiday.date.toLocaleDateString()} - ${
+              holiday.reason
+            }`
+          );
+        }
+      );
+      return;
+    }
+
+    console.log("No holidays found");
+  }
+}
+
+const accountingDepartment: AccountingDepartment = new AccountingDepartment();
+const adminDepartment: AdminDepartment = new AdminDepartment();
+
+const accountingHolidays: Holidays = [
+  { date: new Date(2023, 0, 1), reason: "New Year's Day" },
+  { date: new Date(2023, 0, 2), reason: "Valentine's Day" },
+];
+
+accountingDepartment.addHolidays(accountingHolidays);
+
+const adminHolidays: Holidays = [
+  { date: new Date(2023, 0, 3), reason: "Martin Luther King Jr. Day" },
+  { date: new Date(2023, 0, 4), reason: "Washington's Birthday" },
+];
+
+adminDepartment.addHolidays(adminHolidays);
+
+accountingDepartment.getHolidays();
+adminDepartment.getHolidays();
+```
+
+# Interface in Ts
+
+## Intro
+
+```ts
+interface User {
+  userName: string;
+  email: string;
+  login(): void;
+}
+
+class Admin implements User {
+  constructor(
+    public userName: string,
+    public email: string,
+    public adminLevel: number
+  ) {}
+  login(): void {
+    console.log("Admin logged in");
+  }
+}
+
+class Customer implements User {
+  constructor(public userName: string, public email: string) {}
+  login(): void {
+    console.log("Customer logged in");
+  }
+}
+
+const admin: Admin = new Admin("John", "john@email.com", 10);
+const customer: Customer = new Customer("Mark", "mark@email.com");
+
+class Auth {
+  public static login(user: User): void {
+    user.login();
+  }
+}
+
+Auth.login(admin);
+Auth.login(customer);
+```
+
+## Inherite from multiple interfaces
+
+```ts
+enum Roles {
+  admin = "admin",
+  author = "author",
+  editor = "editor",
+}
+
+interface Role {
+  role: Roles;
+}
+
+enum PermissionList {
+  read = "read",
+  write = "write",
+  execute = "execute",
+}
+
+interface Permission {
+  permission: PermissionList[];
+}
+
+interface User {
+  name: string;
+  email: string;
+  phone: number;
+  gender: string;
+}
+
+interface Admin extends User, Role, Permission {
+  numberOfUsersReporting: number;
+}
+
+const admin: Admin = {
+  name: "John",
+  email: "john@email.com",
+  phone: 123456789,
+  gender: "male",
+  role: Roles.admin,
+  permission: [
+    PermissionList.read,
+    PermissionList.write,
+    PermissionList.execute,
+  ],
+  numberOfUsersReporting: 10,
+};
+
+console.log(admin);
+```
+
+## Interfaces with Generics
+
+```ts
+enum AutomobileTypes {
+  car = "car",
+  motorcycle = "motorcycle",
+  truck = "truck",
+  van = "van",
+  bus = "bus",
+}
+
+enum AutomobileBrands {
+  bmw = "bmw",
+  audi = "audi",
+  mercedes = "mercedes",
+  volkswagen = "volkswagen",
+}
+
+enum AutomobileColors {
+  red = "red",
+  blue = "blue",
+  green = "green",
+  black = "black",
+  silver = "silver",
+}
+
+interface Automobile<Type, Brand, Colors> {
+  type: Type;
+  brand: Brand;
+  colors: Colors[];
+  description: string;
+}
+
+const bmw: Automobile<AutomobileTypes, AutomobileBrands, AutomobileColors> = {
+  type: AutomobileTypes.car,
+  brand: AutomobileBrands.bmw,
+  colors: [AutomobileColors.red, AutomobileColors.blue],
+  description: "BMW is a brand of luxury motor vehicles",
+};
+
+console.log(bmw);
+
+const audi: Automobile<string, string, string> = {
+  type: "car",
+  brand: "audi",
+  colors: ["red", "blue"],
+  description: "Audi is a brand of luxury motor vehicles",
+};
+
+console.log(audi);
+
+const mercedes: Automobile<string, AutomobileBrands, number> = {
+  type: "car",
+  brand: AutomobileBrands.mercedes,
+  colors: [1, 2, 3],
+  description: "Mercedes is a brand of luxury motor vehicles",
+};
+
+console.log(mercedes);
+```
+
+## Using Interfaces with classes
+
+```ts
+enum AutomobileBrands {
+  bmw = "bmw",
+  audi = "audi",
+  mercedes = "mercedes",
+  volkswagen = "volkswagen",
+}
+
+enum AutomobileColors {
+  red = "red",
+  blue = "blue",
+  green = "green",
+  black = "black",
+  silver = "silver",
+}
+
+// Interfaces are the contract only for public methods and properties of a class. Interfaces can be used to define the shape of an object, but they cannot be instantiated. They are used to enforce a contract between classes and other objects. Object has no access modifiers, so does the interface.
+
+//! Be aware of declaration merging. If you have two interfaces with the same name, both will be merged into one. It can cause confusion and errors if you are not careful.
+
+interface Automobile<Type, Brand, Colors> {
+  type: Type;
+  brand: Brand;
+  colors: Colors[];
+  description: string;
+}
+
+class Car implements Automobile<string, AutomobileBrands, AutomobileColors> {
+  public type: string = "car";
+  constructor(
+    public brand: AutomobileBrands,
+    public colors: AutomobileColors[],
+    public description: string
+  ) {}
+}
+
+const bmw: Car = new Car(
+  AutomobileBrands.bmw,
+  [AutomobileColors.red, AutomobileColors.blue],
+  "BMW is a brand of luxury motor vehicles"
+);
+
+console.log(bmw);
+```
