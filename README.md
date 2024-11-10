@@ -2570,3 +2570,113 @@ const bmw: Car = new Car(
 
 console.log(bmw);
 ```
+
+# Prototypes and Objects
+
+## this keyword
+
+```ts
+const book = {
+  title: "The Hobbit",
+  authors: ["J.R.R. Tolkien", "John Ronald Reuel Tolkien"],
+  year: 1925,
+  isbn: "978-0-393-04346-2",
+  log() {
+    console.log(`Book: ${this.title}`);
+  },
+  getAuthors() {
+    this.authors.forEach((author) => {
+      // Arrow functions take the scope of the parent objects.
+      console.log(`${this.title} -  Author: ${author}`);
+    });
+  },
+};
+
+book.getAuthors();
+```
+
+## constructor function
+
+```ts
+class User {
+  constructor(name, email) {
+    this.name = name;
+    this.email = email;
+    this.points = 0;
+  }
+
+  login() {
+    console.log(`${this.name} logged in`);
+  }
+
+  logout() {
+    console.log(` ${this.name} logged out`);
+  }
+
+  addPoints() {
+    this.points++;
+    console.log(`${this.name} added points. Total points: ${this.points}`);
+  }
+}
+
+const user1 = new User("John", "john@email.com");
+const user2 = new User("Mark", "mark@email.com");
+
+console.log(user1);
+
+user2.addPoints();
+```
+
+## JavaScript's own constructor function
+
+```ts
+function User(name, email) {
+  this.name = name;
+  this.email = email;
+  this.points = 0;
+
+  this.login = () => {
+    console.log(`${this.name} logged in`);
+  };
+
+  this.logout = () => {
+    console.log(` ${this.name} logged out`);
+  };
+
+  this.addPoints = () => {
+    this.points++;
+    console.log(`${this.name} added points. Total points: ${this.points}`);
+  };
+}
+
+const user1 = new User("John", "john@email.com");
+
+console.log(user1);
+```
+
+## Prototype
+
+```ts
+function User(name, email) {
+  this.name = name;
+  this.email = email;
+  this.points = 0;
+}
+
+User.prototype.login = () => {
+  console.log(`${this.name} logged in`);
+};
+
+User.prototype.logout = () => {
+  console.log(` ${this.name} logged out`);
+};
+
+User.prototype.addPoints = () => {
+  this.points++;
+  console.log(`${this.name} added points. Total points: ${this.points}`);
+};
+
+const user1 = new User("John", "john@email.com");
+
+console.log(user1);
+```
